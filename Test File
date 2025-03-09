@@ -1,0 +1,158 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <sstream>
+
+using namespace std;
+
+//This adds a new Jedi to the file
+void addJedi() {
+    string name, planet, lightsaberColor;
+
+    //Enter the details of this Jedi
+    cout << "Enter the Jedi's name: ";
+    getline(cin, name);
+    cout << "Enter the planet that the Jedi is from: ";
+    getline(cin, planet);
+    cout << "Enter the Jedi's lightsaber color: ";
+    getline(cin, lightsaberColor);
+
+    //Open the file to add the Jedi
+    ofstream outFile("jedi.txt", ios::app);
+    if (!outFile) {
+        cout << "Error opening file." << endl;
+        return;
+    }
+
+    //Write the Jedi's info to the file
+    outFile << name << ":" << planet << "|" << lightsaberColor << endl;
+
+    cout << name << " was added successfully!" << endl;
+}
+
+//Display all the Jedi from the file
+void displayJedi() {
+    ifstream inFile("jedi.txt");
+
+    if (!inFile) {
+        cout << "Error opening file." << endl;
+        return;
+    }
+
+    string line;
+    int count = 1;
+    cout << "Jedi currently in the Jedi Archive:" << endl;
+
+    while (getline(inFile, line)) {
+        stringstream ss(line);
+        string name, planet, lightsaberColor;
+
+        //Name, planet, and lightsaber color are seperated.
+        getline(ss, name, ':');
+        getline(ss, planet, '|');
+        getline(ss, lightsaberColor);
+
+        //All info printed out
+        cout << count << ". " << name << " from " << planet << " that has a " << lightsaberColor << " lightsaber." << endl;
+        count++;
+    }
+}
+
+//This removes a Jedi
+void removeJedi() {
+    ifstream inFile("jedi.txt");
+
+    if (!inFile) {
+        cout << "Error opening file." << endl;
+        return;
+    }
+
+    string line;
+    int count = 1;
+    cout << "Jedi currently in the Jedi Archive:" << endl;
+
+    //Display the Jedi in the list
+    while (getline(inFile, line)) {
+        stringstream ss(line);
+        string name, planet, lightsaberColor;
+
+        getline(ss, name, ':');
+        getline(ss, planet, '|');
+        getline(ss, lightsaberColor);
+
+        cout << count << ". " << name << " from " << planet << " that has a " << lightsaberColor << " lightsaber." << endl;
+        count++;
+    }
+
+    int numToRemove;
+    cout << "Enter the number of the Jedi you want to remove: ";
+    cin >> numToRemove;
+    cin.ignore();  //Ignores the leftover newline character after reading integer
+
+    //Open the files for reading and writing
+    inFile.clear();
+    inFile.seekg(0, ios::beg);
+
+    ofstream tempFile("temp.txt");
+    count = 1;
+
+    //Copy the Jedi's info except the one to be removed
+    bool removed = false;
+    while (getline(inFile, line)) {
+        if (count != numToRemove) {
+            tempFile << line << endl;
+        } else {
+            removed = true;
+        }
+        count++;
+    }
+
+    if (removed) {
+        cout << "The Jedi has been removed from the file." << endl;
+        inFile.close();
+        tempFile.close();
+
+        //Remove the original file and rename the temporary file to the original file name
+        remove("jedi.txt");
+        rename("temp.txt", "jedi.txt");
+    } else {
+        cout << "Sorry! There is no Jedi with number " << numToRemove << ". Select a Jedi number between 1 and " << count - 1 << "." << endl;
+    }
+}
+
+int main() {
+    int choice;
+
+    //Main program
+    do {
+        cout << "Welcome to Jedi Archives!" << endl;
+        cout << "What would you like to do today?" << endl;
+        cout << "1. Add a new Jedi" << endl;
+        cout << "2. Display all Jedi" << endl;
+        cout << "3. Remove a Jedi" << endl;
+        cout << "4. Exit" << endl;
+        cout << "Please choose an option: ";
+        cin >> choice;
+        cin.ignore(); //Ignores the leftover newline character after reading integer
+
+        switch (choice) {
+            case 1:
+                addJedi();
+                break;
+            case 2:
+                displayJedi();
+                break;
+            case 3:
+                removeJedi();
+                break;
+            case 4:
+                cout << "Thank you for helping the cause! Have a great day! May the Force be with you!!" << endl;
+                break;
+            default:
+                cout << "Sorry! That option doesn't exist. Please choose an option between 1 and 4." << endl;
+                break;
+        }
+    } while (choice != 4);
+
+    return 0;
+}
